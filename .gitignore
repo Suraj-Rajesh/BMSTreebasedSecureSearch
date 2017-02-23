@@ -1,0 +1,6 @@
+index
+env
+*.pyc
+bsmssearch/*.pyc
+bsmssearch/__pycache__
+document_corpus

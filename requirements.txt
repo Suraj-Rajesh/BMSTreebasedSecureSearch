@@ -1,0 +1,4 @@
+nltk==3.2.2
+numpy
+textblob
+pycrypto
