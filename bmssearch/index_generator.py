@@ -4,6 +4,7 @@ from uuid import uuid4
 from hashlib import sha256
 from math import log
 from collections import defaultdict
+from copy import deepcopy
 
 from textblob import TextBlob as tb
 
@@ -55,9 +56,9 @@ def generate_token_map_and_secret(index_directory):
                 index += 1
 
     n = len(token_map)
+    save_object(index_directory + "/n.pkl", n)
 
     # Hash token map into a new encrypted token map
-    encrypted_token_map = dict()
     encrypted_token_map = { sha256(salt.encode() + token.encode()).hexdigest() : metadata for token, metadata in token_map.items()}
 
     # Generate secret
@@ -83,8 +84,8 @@ def encrypt_vsm(vsm_hash):
     global m1t
     global m2t
 
-    encrypted_vsm_hash_1 = vsm_hash
-    encrypted_vsm_hash_2 = vsm_hash
+    encrypted_vsm_hash_1 = deepcopy(vsm_hash)
+    encrypted_vsm_hash_2 = deepcopy(vsm_hash)
 
     for index in range(len(secret)):
         if secret[index] == 1:
@@ -166,11 +167,13 @@ def start_index_generation(prepared_documents_path, index_directory):
     global m1i
     global m2i
 
-    print("Generating textblobs...")
+    # STAGE 1
+
+    print("\nSTAGE 1: \n\nGenerating textblobs...\n")
 
     load_documents(prepared_documents_path)
 
-    print("Preparing index...")
+    print("Preparing index...\n")
 
     save_object(index_directory + "/salt.pkl", salt)
 
@@ -179,22 +182,30 @@ def start_index_generation(prepared_documents_path, index_directory):
 
     generate_token_map_and_secret(index_directory)
 
+    # STAGE 2
     # Create random invertible matrices and store Mt and Mi
-    m1 = generate_random_invertible_matrix(n, 3, 100)
-    m2 = generate_random_invertible_matrix(n, 3, 100)
+    # This is being done as matrix generation from python prompt was much faster than generating it here in the function(esp. for      large matrices)
+    user_input = input("\nEntering STAGE 2 of index generation:\n\n1. Go to bmssearch/helpers directory\n2. Load python3 prompt\n3. Import: from operations import *\nn = load_object('../../index/n.pkl')\n4. Create:\n\tm1 = generate_orthonormal_matrix(n)\n\tm2 = generate_orthonormal_matrix(n)\nSave matrices:\n\tsave_object('../../index/m1.pkl', m1)\n\tsave_object('../../index/m2.pkl', m2)\nType 'y' once done\n\nEnter here: ")
 
-    # Get transpose of matrices
-    m1t = get_transpose(m1)
-    m2t = get_transpose(m2)
+    if user_input == "y":
+        m1 = load_object(index_directory + "/m1.pkl")
+        m2 = load_object(index_directory + "/m2.pkl")
 
-    # Get matrix inverses
-    m1i = get_inverse(m1)
-    m2i = get_inverse(m2)
+        # Get transpose of matrices
+        m1t = get_transpose(m1)
+        m2t = get_transpose(m2)
 
-    # Save matrices
-    save_object(index_directory + "/m1t.pkl", m1t)
-    save_object(index_directory + "/m2t.pkl", m2t)
-    save_object(index_directory + "/m1i.pkl", m1i)
-    save_object(index_directory + "/m2i.pkl", m2i)
+        # Get matrix inverses
+        m1i = get_inverse(m1)
+        m2i = get_inverse(m2)
 
-    build_bmst(corpus_textblobs, index_directory)
+        # Save matrices
+        save_object(index_directory + "/m1t.pkl", m1t)
+        save_object(index_directory + "/m2t.pkl", m2t)
+        save_object(index_directory + "/m1i.pkl", m1i)
+        save_object(index_directory + "/m2i.pkl", m2i)
+
+        build_bmst(corpus_textblobs, index_directory)
+
+    else:
+        print("\nError procesisng with STAGE 2 of index generation. Index generation terminating...\n")
