@@ -35,7 +35,16 @@ def generate_orthonormal_matrix(dimension):
 
 def generate_random_invertible_matrix(n):
 #    return np.triu(np.random.random_integers(range_lower, range_upper, (n, n)))
-    return generate_orthonormal_matrix(n)
+#    return generate_orthonormal_matrix(n)
+    matrix = np.random.random_integers(1, 2, (n, n))
+
+    # Check condition of matrix
+    if np.linalg.cond(matrix) < 1/sys.float_info.epsilon:
+        print("\nGenerated matrix is well defined...\n")
+    else:
+        print("\nMatrix not well-defined. Re-generate matrix...\n")
+
+    return matrix
 
 def get_inverse(matrix):
     return np.linalg.inv(matrix)

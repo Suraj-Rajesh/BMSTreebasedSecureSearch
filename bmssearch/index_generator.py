@@ -107,9 +107,11 @@ def build_bmst(corpus_textblobs, index_directory):
 
     try:
         current_processing_list = list()
+        count = 1
 
         # For each file to be indexed
         for filename, textblob in corpus_textblobs.items():
+            print("Processing file no. " + str(count))
             # Calculate score of all words in the textblob corresponding to that file
             word_score_index = {word: tfidf(word, textblob, corpus_textblobs) for word in textblob.words}
            
@@ -123,9 +125,12 @@ def build_bmst(corpus_textblobs, index_directory):
 
             file_node = Node(vsm_hash = vsm_hash, filename = aes_encrypt(filename, aes_key), encrypted_vsm_hash_1 = encrypted_vsm_hash_1, encrypted_vsm_hash_2 = encrypted_vsm_hash_2)       
             current_processing_list.append(file_node)
+
+            count += 1
     
         # Generating internal nodes, until we reach the root node
         while len(current_processing_list) != 1:
+            print("Processing list size: " + str(len(current_processing_list)))
 
             new_processing_list = list()
 
@@ -188,14 +193,17 @@ def start_index_generation(prepared_documents_path, index_directory):
     user_input = input("\nEntering STAGE 2 of index generation:\n\n1. Go to bmssearch/helpers directory\n2. Load python3 prompt\n3. Import: from operations import *\nn = load_object('../../index/n.pkl')\n4. Create:\n\tm1 = generate_orthonormal_matrix(n)\n\tm2 = generate_orthonormal_matrix(n)\nSave matrices:\n\tsave_object('../../index/m1.pkl', m1)\n\tsave_object('../../index/m2.pkl', m2)\nType 'y' once done\n\nEnter here: ")
 
     if user_input == "y":
+        print("\nLoading encryption matrices\n")
         m1 = load_object(index_directory + "/m1.pkl")
         m2 = load_object(index_directory + "/m2.pkl")
 
         # Get transpose of matrices
+        print("\nGenerating matrix transposes...\n")
         m1t = get_transpose(m1)
         m2t = get_transpose(m2)
 
         # Get matrix inverses
+        print("\nGenerating matrix inverses...\n")
         m1i = get_inverse(m1)
         m2i = get_inverse(m2)
 
