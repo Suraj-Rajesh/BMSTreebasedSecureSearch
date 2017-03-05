@@ -52,7 +52,7 @@ class Node(object):
                     
                     # First check if file nodes exists
                     if file_nodes:
-                        if not (score < min(file_node[1] for file_node in file_nodes) and len(file_node) == top_k):
+                        if not (score < min(file_node[1] for file_node in file_nodes) and len(file_nodes) == top_k):
                             # Children's similarity scores mapped
                             child_node_score[child] = score
                     else:
