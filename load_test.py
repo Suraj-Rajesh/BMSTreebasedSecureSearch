@@ -1,5 +1,5 @@
-from pps.communication_objects import Client_Request
-from pps.network_interface import send_object, receive_object
+from bmssearch.communication_objects import Client_Request
+from bmssearch.network_interface import send_object, receive_object
 import socket
 
 class Search_Client(object):
